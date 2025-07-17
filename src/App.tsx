@@ -32,21 +32,21 @@ function App() {
   };
 
   const productWeights = {
-    "Gürpınar Pet 0,33 Lt.": 500,
-    "Gürpınar Pet 0,50 Lt.": 750,
-    "Gürpınar Pet 1,00 Lt.": 1200,
-    "Gürpınar Pet 1,50 Lt.": 1800,
-    "Gürpınar Pet 5 Lt.": 5500,
-    "Gürpınar Pet 19 Lt.": 19500,
-    "Gürpınar Bardak 200 ml.": 300,
-    "Gürpınar Bardak 250 ml.": 350,
-    "Kızılay Pet 0,50 Lt.": 750,
-    "Kızılay Pet 0,33 Lt.": 500,
-    "Kızılay Pet 1,00 Lt.": 1200,
-    "Kızılay Pet 1,50 Lt.": 1800,
-    "Kızılay Pet 5 Lt.": 5500,
-    "Kızılay Bardak 200 ml.": 300,
-    "Kızılay Bardak 250 ml.": 350,
+    "Gürpınar Pet 0,33 Lt.": 800,
+    "Gürpınar Pet 0,50 Lt.": 800,
+    "Gürpınar Pet 1,00 Lt.": 800,
+    "Gürpınar Pet 1,50 Lt.": 800,
+    "Gürpınar Pet 5 Lt.": 800,
+    "Gürpınar Pet 19 Lt.": 800,
+    "Gürpınar Bardak 200 ml.": 800,
+    "Gürpınar Bardak 250 ml.": 800,
+    "Kızılay Pet 0,50 Lt.": 800,
+    "Kızılay Pet 0,33 Lt.": 800,
+    "Kızılay Pet 1,00 Lt.": 800,
+    "Kızılay Pet 1,50 Lt.": 800,
+    "Kızılay Pet 5 Lt.": 800,
+    "Kızılay Bardak 200 ml.": 800,
+    "Kızılay Bardak 250 ml.": 800,
   };
 
   const getRecommendedVehicleType = (totalWeight) => {
