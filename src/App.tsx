@@ -160,7 +160,7 @@ function App() {
       return;
     }
   
-    const confirmSubmit = window.confirm("SİPARİŞ KAYDETMEYE EMİN MİSİN?");
+    const confirmSubmit = window.confirm("SİPARİŞİ KAYDETMEYE EMİN MİSİN?");
     if (!confirmSubmit) {
       return;
     }
@@ -467,7 +467,7 @@ function App() {
               <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-blue-50 rounded-lg">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Araç Plakası *
+                    Araç Plakası
                   </label>
                   <input
                     name="vehiclePlate"
@@ -479,7 +479,7 @@ function App() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Şoför Adı *
+                    Şoför Adı
                   </label>
                   <input
                     name="driverName"
@@ -491,7 +491,7 @@ function App() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Şoför Telefon *
+                    Şoför Telefon
                   </label>
                   <input
                     type="number"
