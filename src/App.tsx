@@ -71,17 +71,17 @@ function App() {
     if (!formData.shipmentType) {
       newWarnings.push({ type: 'error', message: 'Sevk tipi seçilmedi!' });
     }
-    if (formData.shipmentType === "kendisi") {
-      if (!formData.vehiclePlate.trim()) {
-        newWarnings.push({ type: 'error', message: 'Araç plakası girilmedi!' });
-      }
-      if (!formData.driverName.trim()) {
-        newWarnings.push({ type: 'error', message: 'Şoför adı girilmedi!' });
-      }
-      if (!formData.driverPhone.trim()) {
-        newWarnings.push({ type: 'error', message: 'Şoför telefonu girilmedi!' });
-      }
-    }
+    //if (formData.shipmentType === "kendisi") {
+      //if (!formData.vehiclePlate.trim()) {
+        //newWarnings.push({ type: 'error', message: 'Araç plakası girilmedi!' });
+      //}
+      //if (!formData.driverName.trim()) {
+        //newWarnings.push({ type: 'error', message: 'Şoför adı girilmedi!' });
+      //}
+      //if (!formData.driverPhone.trim()) {
+        //newWarnings.push({ type: 'error', message: 'Şoför telefonu girilmedi!' });
+      //}
+    //}
     if (formData.shipmentType === "biz") {
       if (!formData.recipientName.trim()) {
         newWarnings.push({ type: 'error', message: 'Teslimat kişi adı girilmedi!' });
@@ -160,7 +160,7 @@ function App() {
       return;
     }
   
-    const confirmSubmit = window.confirm("SİPARİŞ FORMUNU KAYDETMEYE EMİN MİSİN?");
+    const confirmSubmit = window.confirm("SİPARİŞ KAYDETMEYE EMİN MİSİN?");
     if (!confirmSubmit) {
       return;
     }
@@ -473,7 +473,6 @@ function App() {
                     name="vehiclePlate"
                     value={formData.vehiclePlate}
                     onChange={handleChange}
-                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="34 ABC 123"
                   />
@@ -486,7 +485,6 @@ function App() {
                     name="driverName"
                     value={formData.driverName}
                     onChange={handleChange}
-                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="Şoför adı"
                   />
@@ -500,7 +498,6 @@ function App() {
                     name="driverPhone"
                     value={formData.driverPhone}
                     onChange={handleChange}
-                    required
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                     placeholder="05xx xxx xx xx"
                   />
