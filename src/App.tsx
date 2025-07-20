@@ -50,7 +50,8 @@ function App() {
   };
 
   const getRecommendedVehicleType = (totalWeight) => {
-    return totalWeight > 15000 ? "tır" : "kamyon";
+    if (totalWeight <= 15000) return "kamyon";
+    return "tır";
   };
 
   const checkWarnings = () => {
@@ -70,6 +71,17 @@ function App() {
     if (!formData.shipmentType) {
       newWarnings.push({ type: 'error', message: 'Sevk tipi seçilmedi!' });
     }
+    //if (formData.shipmentType === "kendisi") {
+      //if (!formData.vehiclePlate.trim()) {
+        //newWarnings.push({ type: 'error', message: 'Araç plakası girilmedi!' });
+      //}
+      //if (!formData.driverName.trim()) {
+        //newWarnings.push({ type: 'error', message: 'Şoför adı girilmedi!' });
+      //}
+      //if (!formData.driverPhone.trim()) {
+        //newWarnings.push({ type: 'error', message: 'Şoför telefonu girilmedi!' });
+      //}
+    //}
     if (formData.shipmentType === "biz") {
       if (!formData.recipientName.trim()) {
         newWarnings.push({ type: 'error', message: 'Teslimat kişi adı girilmedi!' });
@@ -102,44 +114,38 @@ function App() {
   };
 
   useEffect(() => {
-  const recommended = getRecommendedVehicleType(totalWeight);
-  if (formData.vehicleType !== recommended) {
-    setFormData(prev => ({
-      ...prev,
-      vehicleType: recommended
-    }));
-  }
-  checkWarnings();
-  // eslint-disable-next-line
-}, [products, totalWeight]);
+    checkWarnings();
+  }, [formData, products]);
 
-// addProduct fonksiyonu
-const addProduct = () => {
-  const count = parseInt(palletCount);
-  if (!productName.trim()) {
-    alert("Ürün adı boş olamaz!");
-    return;
-  }
-  if (isNaN(count) || count <= 0) {
-    alert("Palet adedi geçerli bir pozitif sayı olmalı!");
-    return;
-  }
-  const weight = productWeights[productName] * count;
-  const newProduct = { productName, palletCount: count, weight };
+  useEffect(() => {
+    const totalWeight = products.reduce((sum, product) => sum + product.weight, 0);
+    if (totalWeight > 0 && !formData.vehicleType) {
+      const recommended = getRecommendedVehicleType(totalWeight);
+      setFormData(prev => ({ ...prev, vehicleType: recommended }));
+    }
+  }, [products]);
 
-  const updatedProducts = [...products, newProduct];
-  setProducts(updatedProducts);
-  setProductName("");
-  setPalletCount("");
-  // setFormData ile araç tipi güncellemesini kaldır!
-};
+  const addProduct = () => {
+    const count = parseInt(palletCount);
+    if (!productName.trim()) {
+      alert("Ürün adı boş olamaz!");
+      return;
+    }
+    if (isNaN(count) || count <= 0) {
+      alert("Palet adedi geçerli bir pozitif sayı olmalı!");
+      return;
+    }
+    const weight = productWeights[productName] * count;
+    const newProduct = { productName, palletCount: count, weight };
+    setProducts((prev) => [...prev, newProduct]);
+    setProductName("");
+    setPalletCount("");
+  };
 
-// removeProduct fonksiyonu
-const removeProduct = (index) => {
-  const updatedProducts = products.filter((_, i) => i !== index);
-  setProducts(updatedProducts);
-  // setFormData ile araç tipi güncellemesini kaldır!
-};
+  const removeProduct = (index) => {
+    setProducts((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const totalWeight = products.reduce((sum, product) => sum + product.weight, 0);
   const maxWeight = 26500;
   const isOverWeight = totalWeight > maxWeight;
@@ -163,7 +169,6 @@ const removeProduct = (index) => {
     try {
       const dataToSend = {
         ...formData,
-        vehicleType: getRecommendedVehicleType(totalWeight),
         vehiclePlate: formData.shipmentType === "kendisi" ? formData.vehiclePlate : null,
         driverName: formData.shipmentType === "kendisi" ? formData.driverName : null,
         driverPhone: formData.shipmentType === "kendisi" ? formData.driverPhone : null,
@@ -172,9 +177,10 @@ const removeProduct = (index) => {
         deliveryNote: formData.deliveryNote || null,
         products: products,
         totalWeight: totalWeight,
-        createdAt: serverTimestamp(),
+        createdAt: serverTimestamp(), // Use Firebase server-side timestamp
       };
 
+      // Add a new document with a generated id to the "orders" collection
       const docRef = await addDoc(collection(db, "orders"), dataToSend);
       console.log("Document written to Firestore with ID: ", docRef.id);
 
@@ -183,7 +189,7 @@ const removeProduct = (index) => {
       
       // Reset form
       setFormData({
-        orderCreator: "", customerName: "", vehicleType: getRecommendedVehicleType(0), shipmentType: "",
+        orderCreator: "", customerName: "", vehicleType: "", shipmentType: "",
         vehiclePlate: "", driverName: "", driverPhone: "", recipientName: "",
         recipientPhone: "", deliveryNote: "",
       });
@@ -198,7 +204,9 @@ const removeProduct = (index) => {
       setIsLoading(false);
     }
   };
-
+  
+  // (The rest of your component's JSX remains exactly the same)
+  // ... from <div className="min-h-screen..."> to </div>
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
@@ -388,170 +396,191 @@ const removeProduct = (index) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Sevk Tipi *
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Araç Tipi *
+                  {totalWeight > 0 && (
+                    <span className="text-xs text-blue-600 ml-2">
+                      (Önerilen: {getRecommendedVehicleType(totalWeight) === "kamyon" ? "Kamyon" : "Tır"})
+                    </span>
+                  )}
                 </label>
-                <select
-                  name="shipmentType"
-                  value={formData.shipmentType}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
-                >
-                  <option value="">Seçiniz</option>
-                  <option value="kendisi">Kendisi Sevk</option>
-                  <option value="biz">Biz Sevk</option>
-                </select>
+                <div className="space-y-2">
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="vehicleType"
+                      value="kamyon"
+                      checked={formData.vehicleType === "kamyon"}
+                      onChange={handleChange}
+                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+                      required
+                    />
+                    <span className="text-gray-700">Kamyon</span>
+                  </label>
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="vehicleType"
+                      value="tır"
+                      checked={formData.vehicleType === "tır"}
+                      onChange={handleChange}
+                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+                    />
+                    <span className="text-gray-700">Tır</span>
+                  </label>
+                </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Araç Tipi *
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Sevk Tipi *
                 </label>
-                <select
-                  type="text"
-                  value={getRecommendedVehicleType(totalWeight) === "kamyon" ? "Kamyon" : "Tır"}
-                  readOnly
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
-                >
-                  <option value="">Seçiniz</option>
-                  <option value="kamyon">Kamyon</option>
-                  <option value="tır">Tır</option>
-                </select>
+                <div className="space-y-2">
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="shipmentType"
+                      value="kendisi"
+                      checked={formData.shipmentType === "kendisi"}
+                      onChange={handleChange}
+                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+                      required
+                    />
+                    <span className="text-gray-700">Kendisi Gelecek</span>
+                  </label>
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="shipmentType"
+                      value="biz"
+                      checked={formData.shipmentType === "biz"}
+                      onChange={handleChange}
+                      className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+                    />
+                    <span className="text-gray-700">Biz Sevk Edeceğiz</span>
+                  </label>
+                </div>
               </div>
             </div>
 
             {formData.shipmentType === "kendisi" && (
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-blue-50 rounded-lg">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Araç Plakası *
+                    Araç Plakası
                   </label>
                   <input
                     name="vehiclePlate"
                     value={formData.vehiclePlate}
                     onChange={handleChange}
-                    required={formData.shipmentType === "kendisi"}
-                    placeholder="Plaka"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    placeholder="34 ABC 123"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Şoför Adı *
+                    Şoför Adı
                   </label>
                   <input
                     name="driverName"
                     value={formData.driverName}
                     onChange={handleChange}
-                    required={formData.shipmentType === "kendisi"}
-                    placeholder="Şoför Adı"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    placeholder="Şoför adı"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Şoför Telefonu *
+                    Şoför Telefon
                   </label>
                   <input
+                    type="number"
                     name="driverPhone"
                     value={formData.driverPhone}
                     onChange={handleChange}
-                    required={formData.shipmentType === "kendisi"}
-                    placeholder="05xxxxxxxxx"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                    placeholder="05xx xxx xx xx"
                   />
                 </div>
               </div>
             )}
 
             {formData.shipmentType === "biz" && (
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Teslimat Kişi Adı *
-                  </label>
-                  <input
-                    name="recipientName"
-                    value={formData.recipientName}
-                    onChange={handleChange}
-                    required={formData.shipmentType === "biz"}
-                    placeholder="Teslimat Kişi Adı"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
-                  />
+              <div className="mt-6 space-y-4 p-4 bg-green-50 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Teslimat Kişi Adı *
+                    </label>
+                    <input
+                      name="recipientName"
+                      value={formData.recipientName}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                      placeholder="Teslim alacak kişi"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Teslimat Telefon *
+                    </label>
+                    <input
+                      type="number"
+                      name="recipientPhone"
+                      value={formData.recipientPhone}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                      placeholder="05xx xxx xx xx"
+                    />
+                  </div>
                 </div>
+                
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Teslimat Telefonu *
-                  </label>
-                  <input
-                    name="recipientPhone"
-                    value={formData.recipientPhone}
-                    onChange={handleChange}
-                    required={formData.shipmentType === "biz"}
-                    placeholder="05xxxxxxxxx"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Teslimat Notu
+                  <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center space-x-2">
+                    <MessageSquare className="h-4 w-4" />
+                    <span>Teslimat Notu</span>
+                    <span className="text-xs text-gray-500">(Önerilir)</span>
                   </label>
                   <textarea
                     name="deliveryNote"
                     value={formData.deliveryNote}
                     onChange={handleChange}
-                    placeholder="Not ekleyin..."
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
                     rows={3}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                    placeholder="Teslimat ile ilgili özel notlar, adres tarifi, dikkat edilmesi gerekenler..."
                   />
                 </div>
               </div>
             )}
           </div>
 
-          {/* Uyarılar */}
-          {warnings.length > 0 && (
-            <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4 space-y-2">
-              {warnings.map((warn, idx) => {
-                let Icon = Info;
-                let colorClass = "text-yellow-700";
-                if (warn.type === 'error') {
-                  Icon = AlertTriangle;
-                  colorClass = "text-red-700";
-                } else if (warn.type === 'warning') {
-                  Icon = AlertTriangle;
-                  colorClass = "text-yellow-700";
-                } else if (warn.type === 'info') {
-                  Icon = Info;
-                  colorClass = "text-blue-700";
-                }
-                return (
-                  <div key={idx} className={`flex items-center space-x-2 text-sm ${colorClass}`}>
-                    <Icon className="h-5 w-5 flex-shrink-0" />
-                    <span>{warn.message}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Gönderme Butonu */}
-          <div className="pt-6">
+          <div className="text-center">
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold px-6 py-4 rounded-lg transition-colors flex items-center justify-center space-x-2"
+              disabled={isLoading || isOverWeight}
+              className="inline-flex items-center space-x-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
-              {isLoading ? "Gönderiliyor..." : (
-                <>
-                  <Send className="h-5 w-5" />
-                  <span>Siparişi Gönder</span>
-                </>
+              {isLoading ? (
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              ) : (
+                <Send className="h-5 w-5" />
               )}
+              <span>{isLoading ? "Kaydediliyor..." : "Siparişi Kaydet"}</span>
             </button>
+            
+            {warnings.filter(w => w.type === 'error').length > 0 && (
+              <p className="text-red-600 text-sm mt-2">
+                Formu göndermek için önce tüm hataları düzeltmelisiniz.
+              </p>
+            )}
           </div>
         </form>
+
+        <div className="text-center mt-12 text-gray-500">
+          <p>Sipariş formunuz Firebase Firestore'a otomatik olarak kaydedilecektir.</p>
+        </div>
       </div>
     </div>
   );
