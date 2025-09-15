@@ -47,6 +47,7 @@ function App() {
     "Kızılay Pet 5 Lt.": 850,
     "Kızılay Bardak 200 ml.": 900,
     "Kızılay Bardak 250 ml.": 1050,
+    "Kızılay Damacana 19 Lt.": 730,
   };
 
   const getRecommendedVehicleType = (totalWeight) => {
