@@ -268,7 +268,8 @@ function App() {
                   <option value="Erhan Akkaş">Erhan Akkaş</option>
                   <option value="Serdar Mehmet Karaarslan">Serdar Mehmet Karaarslan</option>
                   <option value="Süleyman Adışen">Süleyman Adışen</option>
-                  <option value="Uğur Avcı">Uğur Avcı</option>
+                  <option value="Kamil Gürler">Kamil Gürler</option>
+                  <option value="Volkan Atak">Volkan Atak</option>
                 </select>
               </div>
 
